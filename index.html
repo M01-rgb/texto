@@ -194,22 +194,16 @@
             flex-wrap: wrap;
             gap: 15px;
             margin-top: 15px;
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 10px;
-            border: 1px solid #ecf0f1;
-            border-radius: 10px;
         }
 
         .voice-option {
             flex: 1;
-            min-width: 250px;
+            min-width: 200px;
             padding: 15px;
             border: 2px solid #ddd;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
         }
 
         .voice-option:hover {
@@ -226,37 +220,11 @@
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 5px;
-            font-size: 1rem;
         }
 
         .voice-lang {
             color: #7f8c8d;
             font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-
-        .voice-type {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            background-color: #3498db;
-            color: white;
-            margin-right: 5px;
-        }
-
-        .voice-type.local {
-            background-color: #27ae60;
-        }
-
-        .natural-badge {
-            background-color: #f39c12;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            display: inline-block;
-            margin-left: 5px;
         }
 
         .buttons {
@@ -472,24 +440,14 @@
             font-size: 0.9rem;
         }
 
-        .voice-search {
-            width: 100%;
+        .warning-message {
+            background-color: #fef9e7;
+            color: #f39c12;
             padding: 10px;
-            margin-bottom: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .voice-search:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .voice-count {
-            margin-bottom: 10px;
-            color: #7f8c8d;
-            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid #f39c12;
         }
 
         @media (max-width: 768px) {
@@ -519,13 +477,13 @@
     <div class="container">
         <header>
             <h1>Convertisseur Texte-Voix Naturelle</h1>
-            <p class="subtitle">✨ Retrouvez les voix naturelles du premier code - Français et Anglais en priorité</p>
+            <p class="subtitle">Transformez votre texte en parole naturelle avec téléchargement MP3 et support VoiceRSS</p>
         </header>
 
         <section class="apikey-section">
             <h2>Configuration VoiceRSS</h2>
             <div class="engine-selector">
-                <div class="engine-option selected" id="engineBrowser">Moteur Navigateur</div>
+                <div class="engine-option selected" id="engineBrowser">Moteur Navigateur (Gratuit)</div>
                 <div class="engine-option" id="engineVoiceRSS">VoiceRSS (Téléchargement MP3)</div>
             </div>
             
@@ -533,25 +491,34 @@
                 <div class="api-container">
                     <div class="api-input-group">
                         <label for="apiKey">Clé API VoiceRSS</label>
-                        <input type="text" id="apiKey" placeholder="Entrez votre clé API VoiceRSS" value="a14541231b764962942cac8697f2ca29">
+                        <input type="text" id="apiKey" placeholder="Entrez votre clé API VoiceRSS" value="">
                     </div>
                 </div>
                 <p class="api-note">
-                    <strong>✅ Votre clé API est déjà configurée !</strong> La version gratuite offre 350 requêtes par jour.
+                    <strong>⚠️ Attention :</strong> La clé API préconfigurée n'est plus valide. 
+                    Vous devez obtenir votre propre clé gratuite sur <a href="https://www.voicerss.org/" target="_blank">VoiceRSS.org</a>.
+                    La version gratuite offre 350 requêtes par jour avec une limite de 100kb par requête.
                 </p>
+                <div class="warning-message" id="apiKeyWarning">
+                    ⚠️ Pour utiliser VoiceRSS, vous devez entrer une clé API valide.
+                </div>
             </div>
         </section>
 
         <section class="input-section">
             <h2>Texte à convertir</h2>
-            <textarea id="textInput" placeholder="Écrivez ou collez votre texte ici...">Bonjour ! Je suis votre assistant vocal. Je peux lire votre texte avec une voix naturelle, comme dans le premier code.</textarea>
+            <textarea id="textInput" placeholder="Écrivez ou collez votre texte ici...">Bonjour ! Je suis votre assistant vocal. Je peux lire votre texte avec une voix naturelle, en respectant parfaitement la ponctuation : les virgules, les points, les points d'interrogation et d'exclamation.
+
+Cette technologie utilise l'API de synthèse vocale de votre navigateur ou VoiceRSS. Vous pouvez ajuster la vitesse, le volume et choisir parmi différentes voix disponibles.
+
+Avec VoiceRSS, vous pouvez également télécharger le fichier audio en MP3 pour l'utiliser hors ligne.</textarea>
             <div class="stats">
                 <span id="charCount">0 caractères</span>
                 <span id="wordCount">0 mots</span>
                 <span id="sentenceCount">0 phrases</span>
                 <span id="audioSize">0 KB</span>
             </div>
-            <p class="example-text" id="loadExample">Charger un exemple de texte</p>
+            <p class="example-text" id="loadExample">Charger un exemple de texte avec ponctuation</p>
         </section>
 
         <section class="controls-section">
@@ -583,8 +550,7 @@
 
         <section class="voices-section">
             <h2>Sélectionnez une voix</h2>
-            <input type="text" id="voiceSearch" class="voice-search" placeholder="🔍 Rechercher une voix...">
-            <div class="voice-count" id="voiceCount">Chargement des voix...</div>
+            <p id="voicesLoading">Chargement des voix disponibles...</p>
             <div class="voices-container" id="voicesContainer">
                 <!-- Les options de voix seront ajoutées dynamiquement -->
             </div>
@@ -616,10 +582,23 @@
         </div>
 
         <div id="apiMessage"></div>
+
+        <div class="instructions">
+            <h3>Instructions d'utilisation</h3>
+            <ul>
+                <li><strong>Étape 1 :</strong> Choisissez entre le moteur navigateur (gratuit) ou VoiceRSS (nécessite une clé API)</li>
+                <li><strong>Étape 2 :</strong> Pour VoiceRSS, obtenez votre clé gratuite sur <a href="https://www.voicerss.org/" target="_blank">VoiceRSS.org</a> et collez-la dans le champ</li>
+                <li><strong>Étape 3 :</strong> Saisissez ou collez votre texte dans la zone de texte</li>
+                <li><strong>Étape 4 :</strong> Ajustez les paramètres (vitesse, ton, volume) selon vos préférences</li>
+                <li><strong>Étape 5 :</strong> Sélectionnez une voix parmi celles disponibles</li>
+                <li><strong>Étape 6 :</strong> Cliquez sur "Lire le texte" pour démarrer la synthèse vocale</li>
+                <li><strong>Étape 7 :</strong> Avec VoiceRSS, utilisez "Télécharger MP3" pour sauvegarder</li>
+            </ul>
+        </div>
     </div>
 
     <footer>
-        <p>✨ Version avec les mêmes voix que le premier code - Google, Microsoft, français et anglais</p>
+        <p>Outil de synthèse vocale avec support VoiceRSS - Compatible avec les navigateurs modernes</p>
     </footer>
 
     <script>
@@ -636,8 +615,7 @@
         const volumeSlider = document.getElementById('volume');
         const volumeValue = document.getElementById('volumeValue');
         const voicesContainer = document.getElementById('voicesContainer');
-        const voiceSearch = document.getElementById('voiceSearch');
-        const voiceCount = document.getElementById('voiceCount');
+        const voicesLoading = document.getElementById('voicesLoading');
         const playBtn = document.getElementById('playBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const resumeBtn = document.getElementById('resumeBtn');
@@ -651,18 +629,18 @@
         const engineBrowser = document.getElementById('engineBrowser');
         const engineVoiceRSS = document.getElementById('engineVoiceRSS');
         const apiMessage = document.getElementById('apiMessage');
+        const apiKeyWarning = document.getElementById('apiKeyWarning');
 
         // Variables globales
         let synth = window.speechSynthesis;
-        let allVoices = [];
-        let displayedVoices = [];
+        let voices = [];
         let selectedVoice = null;
         let isPlaying = false;
         let isPaused = false;
         let currentUtterance = null;
         let audioBlob = null;
         let audioUrl = null;
-        let currentEngine = 'browser';
+        let currentEngine = 'browser'; // 'browser' ou 'voicerss'
         let audioElement = null;
 
         // Configuration des moteurs
@@ -683,16 +661,26 @@
             voiceRSSConfig.classList.remove('hidden');
             currentEngine = 'voicerss';
             updateButtons();
-            status.textContent = 'VoiceRSS activé';
-            status.className = 'status ready';
+            
+            // Vérifier si une clé API est présente
+            if (apiKeyInput.value.trim()) {
+                status.textContent = 'VoiceRSS activé - Clé API configurée';
+                status.className = 'status ready';
+                apiKeyWarning.classList.add('hidden');
+            } else {
+                status.textContent = 'VoiceRSS activé - Veuillez entrer votre clé API';
+                status.className = 'status ready';
+                apiKeyWarning.classList.remove('hidden');
+            }
+            
             clearApiMessage();
         });
 
-        // Fonctions d'affichage
+        // Fonction pour afficher les messages API
         function showApiMessage(message, type = 'error') {
             clearApiMessage();
             const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.className = type === 'error' ? 'error-message' : type === 'warning' ? 'warning-message' : 'success-message';
             messageDiv.textContent = message;
             apiMessage.appendChild(messageDiv);
         }
@@ -701,251 +689,148 @@
             apiMessage.innerHTML = '';
         }
 
-        function updateStatus(text, className) {
-            status.textContent = text;
-            status.className = `status ${className}`;
-        }
-
-        // Mettre à jour les statistiques
+        // Mettre à jour les statistiques du texte
         function updateTextStats() {
             const text = textInput.value;
-            charCount.textContent = `${text.length} caractères`;
+            const charCountValue = text.length;
+            const wordCountValue = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
             
-            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-            wordCount.textContent = `${words} mots`;
+            // Compter les phrases (séparées par . ! ?)
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            const sentenceCountValue = sentences.length;
             
-            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
-            sentenceCount.textContent = `${sentences} phrases`;
+            // Estimation de la taille audio (approximative)
+            const estimatedAudioSize = Math.round(charCountValue * 0.05);
             
-            const estimatedSize = Math.round(text.length * 0.05);
-            audioSize.textContent = `${estimatedSize} KB estimés`;
+            charCount.textContent = `${charCountValue} caractères`;
+            wordCount.textContent = `${wordCountValue} mots`;
+            sentenceCount.textContent = `${sentenceCountValue} phrases`;
+            audioSize.textContent = `${estimatedAudioSize} KB estimés`;
         }
 
-        // Sliders
-        rateSlider.addEventListener('input', () => rateValue.textContent = rateSlider.value);
-        pitchSlider.addEventListener('input', () => pitchValue.textContent = pitchSlider.value);
-        volumeSlider.addEventListener('input', () => volumeValue.textContent = volumeSlider.value);
+        // Mettre à jour l'affichage des valeurs des sliders
+        rateSlider.addEventListener('input', () => {
+            rateValue.textContent = rateSlider.value;
+        });
 
-        // ✅ Fonction pour identifier les voix naturelles du premier code
-        function isNaturalVoice(voiceName, voiceLang) {
-            const naturalVoices = [
-                // Voix françaises
-                'google français',
-                'microsoft julie',
-                'microsoft hortense',
-                'fr-fr-standard',
-                'fr-fr-wavenet',
-                // Voix anglaises UK
-                'google uk english female',
-                'google uk english male',
-                'microsoft susan',
-                'microsoft hazel',
-                // Voix américaines
-                'google us english',
-                'microsoft zira',
-                'microsoft david',
-                // Mots-clés génériques
-                'google',
-                'microsoft',
-                'wavenet',
-                'standard'
-            ];
-            
-            const nameLower = voiceName.toLowerCase();
-            const langLower = voiceLang.toLowerCase();
-            
-            // Les voix françaises sont prioritaires
-            if (langLower.startsWith('fr')) {
-                return true;
-            }
-            
-            // Les voix anglaises UK et US
-            if (langLower.startsWith('en')) {
-                return true;
-            }
-            
-            // Vérifier les mots-clés
-            for (const pattern of naturalVoices) {
-                if (nameLower.includes(pattern)) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
+        pitchSlider.addEventListener('input', () => {
+            pitchValue.textContent = pitchSlider.value;
+        });
 
-        // ✅ Fonction pour trier les voix comme dans le premier code
-        function sortVoicesLikeFirstCode(voices) {
-            return voices.sort((a, b) => {
-                // 1. Voix françaises d'abord
-                const aIsFrench = a.lang.startsWith('fr');
-                const bIsFrench = b.lang.startsWith('fr');
-                if (aIsFrench && !bIsFrench) return -1;
-                if (!aIsFrench && bIsFrench) return 1;
-                
-                // 2. Voix anglaises ensuite
-                const aIsEnglish = a.lang.startsWith('en');
-                const bIsEnglish = b.lang.startsWith('en');
-                if (aIsEnglish && !bIsEnglish && !aIsFrench) return -1;
-                if (!aIsEnglish && bIsEnglish && !bIsFrench) return 1;
-                
-                // 3. Google avant Microsoft
-                const aIsGoogle = a.name.toLowerCase().includes('google');
-                const bIsGoogle = b.name.toLowerCase().includes('google');
-                if (aIsGoogle && !bIsGoogle) return -1;
-                if (!aIsGoogle && bIsGoogle) return 1;
-                
-                // 4. Microsoft ensuite
-                const aIsMicrosoft = a.name.toLowerCase().includes('microsoft');
-                const bIsMicrosoft = b.name.toLowerCase().includes('microsoft');
-                if (aIsMicrosoft && !bIsMicrosoft) return -1;
-                if (!aIsMicrosoft && bIsMicrosoft) return 1;
-                
-                // 5. Wavenet avant Standard
-                const aIsWavenet = a.name.toLowerCase().includes('wavenet');
-                const bIsWavenet = b.name.toLowerCase().includes('wavenet');
-                if (aIsWavenet && !bIsWavenet) return -1;
-                if (!aIsWavenet && bIsWavenet) return 1;
-                
-                // 6. Ensuite tri alphabétique
-                if (a.lang < b.lang) return -1;
-                if (a.lang > b.lang) return 1;
-                if (a.name < b.name) return -1;
-                if (a.name > b.name) return 1;
-                return 0;
-            });
-        }
+        volumeSlider.addEventListener('input', () => {
+            volumeValue.textContent = volumeSlider.value;
+        });
 
-        // Afficher les voix
-        function displayVoices() {
+        // Charger les voix disponibles pour le navigateur
+        function loadVoices() {
+            voices = synth.getVoices();
+            voicesLoading.style.display = 'none';
             voicesContainer.innerHTML = '';
             
-            if (displayedVoices.length === 0) {
-                voicesContainer.innerHTML = '<p>Aucune voix disponible.</p>';
-                voiceCount.textContent = '0 voix disponible';
+            if (voices.length === 0) {
+                voicesContainer.innerHTML = '<p>Aucune voix disponible. Votre navigateur peut ne pas supporter la synthèse vocale.</p>';
                 return;
             }
             
-            voiceCount.textContent = `${displayedVoices.length} voix disponible${displayedVoices.length > 1 ? 's' : ''}`;
+            const frenchVoices = voices.filter(voice => 
+                voice.lang.startsWith('fr') || 
+                voice.lang.startsWith('en') || 
+                voice.name.toLowerCase().includes('french')
+            );
             
-            displayedVoices.forEach((voice) => {
+            const voicesToShow = frenchVoices.length > 0 ? frenchVoices : voices;
+            
+            voicesToShow.sort((a, b) => {
+                if (a.lang < b.lang) return -1;
+                if (a.lang > b.lang) return 1;
+                return 0;
+            });
+            
+            voicesToShow.forEach((voice, index) => {
                 const voiceOption = document.createElement('div');
                 voiceOption.className = 'voice-option';
-                
-                if (selectedVoice && selectedVoice.name === voice.name && selectedVoice.lang === voice.lang) {
+                if (index === 0) {
                     voiceOption.classList.add('selected');
+                    selectedVoice = voice;
                 }
                 
-                const voiceType = voice.localService ? 'Locale' : 'Réseau';
-                const voiceTypeClass = voice.localService ? 'local' : '';
-                const isNatural = isNaturalVoice(voice.name, voice.lang);
-                
                 voiceOption.innerHTML = `
-                    <div class="voice-name">
-                        ${voice.name}
-                        ${isNatural ? '✨' : ''}
-                        ${voice.lang.startsWith('fr') ? '🇫🇷' : voice.lang.startsWith('en') ? '🇬🇧' : ''}
-                    </div>
-                    <div class="voice-lang">${voice.lang}</div>
-                    <span class="voice-type ${voiceTypeClass}">${voiceType}</span>
+                    <div class="voice-name">${voice.name}</div>
+                    <div class="voice-lang">${voice.lang} - ${voice.localService ? 'Locale' : 'Réseau'}</div>
                 `;
                 
                 voiceOption.addEventListener('click', () => {
-                    document.querySelectorAll('.voice-option').forEach(opt => opt.classList.remove('selected'));
+                    document.querySelectorAll('.voice-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    
                     voiceOption.classList.add('selected');
                     selectedVoice = voice;
-                    showApiMessage(`✅ Voix sélectionnée : ${voice.name}`, 'success');
                 });
                 
                 voicesContainer.appendChild(voiceOption);
             });
         }
 
-        // Filtrer les voix
-        function filterVoices() {
-            const searchTerm = voiceSearch.value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                displayedVoices = [...allVoices];
-            } else {
-                displayedVoices = allVoices.filter(voice => 
-                    voice.name.toLowerCase().includes(searchTerm) ||
-                    voice.lang.toLowerCase().includes(searchTerm)
-                );
+        // Initialiser les voix du navigateur
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        // Charger les voix au démarrage (pour les navigateurs qui ne supportent pas onvoiceschanged)
+        setTimeout(() => {
+            if (voices.length === 0) {
+                loadVoices();
             }
-            
-            displayVoices();
-        }
+        }, 500);
 
-        // ✅ Charger les voix comme dans le premier code
-        function loadVoices() {
-            const newVoices = synth.getVoices();
-            
-            if (newVoices.length > 0) {
-                // Séparer les voix naturelles
-                const naturalVoices = [];
-                const otherVoices = [];
-                
-                newVoices.forEach(voice => {
-                    if (isNaturalVoice(voice.name, voice.lang)) {
-                        naturalVoices.push(voice);
-                    } else {
-                        otherVoices.push(voice);
-                    }
-                });
-                
-                // Trier les voix naturelles comme dans le premier code
-                const sortedNatural = sortVoicesLikeFirstCode(naturalVoices);
-                const sortedOther = sortVoicesLikeFirstCode(otherVoices);
-                
-                // Combiner : naturelles d'abord, puis les autres
-                allVoices = [...sortedNatural, ...sortedOther];
-                displayedVoices = [...allVoices];
-                
-                // Sélectionner la première voix française si disponible
-                const frenchVoice = allVoices.find(v => v.lang.startsWith('fr'));
-                if (frenchVoice) {
-                    selectedVoice = frenchVoice;
-                } else if (allVoices.length > 0) {
-                    selectedVoice = allVoices[0];
-                }
-                
-                displayVoices();
-                showApiMessage(`✅ ${naturalVoices.length} voix naturelles chargées`, 'success');
-            }
-        }
-
-        // Initialiser les voix
-        if (typeof speechSynthesis !== 'undefined') {
-            speechSynthesis.onvoiceschanged = loadVoices;
-        }
-        loadVoices();
-
-        // Recherche
-        voiceSearch.addEventListener('input', filterVoices);
-
-        // Mettre à jour les stats
+        // Mettre à jour les stats du texte au chargement et à chaque modification
         textInput.addEventListener('input', updateTextStats);
         updateTextStats();
 
-        // VoiceRSS
+        // Vérifier la validité de la clé API VoiceRSS
+        function isValidApiKey(key) {
+            // Une clé API VoiceRSS valide fait généralement au moins 20 caractères
+            return key && key.trim().length >= 20;
+        }
+
+        // Utiliser VoiceRSS pour la synthèse vocale
         async function speakWithVoiceRSS() {
             const text = textInput.value.trim();
             const apiKey = apiKeyInput.value.trim();
             
+            // Vérifications approfondies
             if (!apiKey) {
-                showApiMessage('Veuillez entrer votre clé API VoiceRSS.');
-                return;
+                showApiMessage('❌ Veuillez entrer votre clé API VoiceRSS.');
+                apiKeyWarning.classList.remove('hidden');
+                playBtn.disabled = false;
+                return false;
+            }
+            
+            if (!isValidApiKey(apiKey)) {
+                showApiMessage('❌ La clé API semble invalide. Une clé VoiceRSS valide contient au moins 20 caractères.');
+                apiKeyWarning.classList.remove('hidden');
+                playBtn.disabled = false;
+                return false;
             }
             
             if (text === '') {
-                showApiMessage('Veuillez saisir du texte à lire.');
-                return;
+                showApiMessage('❌ Veuillez saisir du texte à lire.');
+                playBtn.disabled = false;
+                return false;
+            }
+            
+            if (text.length > 5000) {
+                showApiMessage('❌ Le texte est trop long pour VoiceRSS gratuit (limite: 5000 caractères). Réduisez le texte.');
+                playBtn.disabled = false;
+                return false;
             }
             
             playBtn.disabled = true;
-            updateStatus('Génération audio...', 'processing');
+            status.textContent = 'Génération de l\'audio en cours...';
+            status.className = 'status processing';
             clearApiMessage();
+            apiKeyWarning.classList.add('hidden');
             
             try {
                 const params = new URLSearchParams({
@@ -955,75 +840,159 @@
                     v: 'Louis',
                     r: rateSlider.value,
                     c: 'MP3',
-                    f: '44khz_16bit_stereo'
+                    f: '44khz_16bit_stereo',
+                    ssml: 'false'
                 });
                 
+                console.log('Envoi requête à VoiceRSS...');
                 const response = await fetch(`https://api.voicerss.org/?${params.toString()}`);
-                const responseText = await response.text();
                 
-                if (responseText.startsWith('ERROR')) {
-                    throw new Error(responseText);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
                 }
                 
+                // Vérifier le type de contenu
+                const contentType = response.headers.get('content-type');
+                console.log('Type de contenu reçu:', contentType);
+                
+                // Lire la réponse comme texte d'abord pour détecter les erreurs
+                const responseText = await response.text();
+                
+                // Vérifier si c'est une erreur VoiceRSS (commence par "ERROR")
+                if (responseText.startsWith('ERROR')) {
+                    throw new Error(`VoiceRSS: ${responseText}`);
+                }
+                
+                // Convertir en Blob
                 const audioData = new Blob([responseText], { type: 'audio/mpeg' });
+                
+                if (!audioData || audioData.size === 0) {
+                    throw new Error('Réponse audio vide de VoiceRSS');
+                }
+                
+                console.log('Audio reçu, taille:', audioData.size, 'bytes');
+                
                 audioBlob = audioData;
                 
-                if (audioUrl) URL.revokeObjectURL(audioUrl);
+                if (audioUrl) {
+                    URL.revokeObjectURL(audioUrl);
+                }
                 audioUrl = URL.createObjectURL(audioBlob);
                 
-                if (!audioElement) audioElement = new Audio();
+                if (!audioElement) {
+                    audioElement = new Audio();
+                }
+                
                 audioElement.src = audioUrl;
                 audioElement.volume = parseFloat(volumeSlider.value);
+                
+                // Nettoyer les anciens gestionnaires d'événements
+                audioElement.onplay = null;
+                audioElement.onpause = null;
+                audioElement.onended = null;
+                audioElement.onerror = null;
                 
                 audioElement.onplay = () => {
                     isPlaying = true;
                     isPaused = false;
                     updateButtons();
-                    updateStatus('Lecture en cours...', 'speaking');
+                    status.textContent = 'Lecture en cours...';
+                    status.className = 'status speaking';
+                };
+                
+                audioElement.onpause = () => {
+                    isPaused = true;
+                    updateButtons();
+                    status.textContent = 'Lecture en pause';
+                    status.className = 'status paused';
                 };
                 
                 audioElement.onended = () => {
                     isPlaying = false;
                     isPaused = false;
                     updateButtons();
-                    updateStatus('Lecture terminée', 'ready');
-                    showApiMessage('Audio généré !', 'success');
+                    status.textContent = 'Lecture terminée - Prêt à télécharger';
+                    status.className = 'status ready';
+                    showApiMessage('✅ Audio généré avec succès ! Cliquez sur "Télécharger MP3" pour enregistrer.', 'success');
+                };
+                
+                audioElement.onerror = (error) => {
+                    console.error('Erreur audio:', error);
+                    isPlaying = false;
+                    isPaused = false;
+                    updateButtons();
+                    status.textContent = 'Erreur lors de la lecture audio';
+                    status.className = 'status stopped';
+                    playBtn.disabled = false;
+                    showApiMessage('❌ Erreur lors de la lecture audio. Veuillez réessayer.');
                 };
                 
                 downloadBtn.disabled = false;
-                await audioElement.play();
+                
+                // Essayer de jouer l'audio
+                try {
+                    await audioElement.play();
+                } catch (playError) {
+                    console.error('Erreur de lecture:', playError);
+                    // Si la lecture automatique est bloquée, on propose de télécharger
+                    showApiMessage('⚠️ La lecture automatique a été bloquée. Cliquez sur "Télécharger MP3" pour écouter le fichier.', 'warning');
+                    status.textContent = 'Audio généré - Cliquez sur Télécharger MP3';
+                    status.className = 'status ready';
+                }
+                
                 playBtn.disabled = false;
+                return true;
                 
             } catch (error) {
-                showApiMessage(`Erreur: ${error.message}`, 'error');
-                updateStatus('Erreur', 'error');
+                console.error('Erreur détaillée VoiceRSS:', error);
+                
+                // Messages d'erreur plus précis
+                if (error.message.includes('ERROR: The API key is not available')) {
+                    showApiMessage('❌ La clé API VoiceRSS est invalide ou a expiré. Obtenez une nouvelle clé sur voicerss.org');
+                    apiKeyWarning.classList.remove('hidden');
+                } else if (error.message.includes('ERROR: The text length')) {
+                    showApiMessage('❌ Texte trop long pour la version gratuite (max 5000 caractères)');
+                } else if (error.message.includes('ERROR: The requests limit')) {
+                    showApiMessage('❌ Limite de requêtes quotidienne atteinte (350/jour)');
+                } else if (error.message.includes('VoiceRSS:')) {
+                    showApiMessage(`❌ Erreur VoiceRSS: ${error.message.replace('VoiceRSS: ', '')}`);
+                } else {
+                    showApiMessage(`❌ Erreur: ${error.message}`);
+                }
+                
+                status.textContent = 'Erreur lors de la génération audio';
+                status.className = 'status stopped';
                 playBtn.disabled = false;
+                downloadBtn.disabled = true;
+                return false;
             }
         }
 
-        // Synthèse navigateur
+        // Utiliser la synthèse vocale du navigateur
         function speakWithBrowser() {
             const text = textInput.value.trim();
             
+            // Vérifications préalables
             if (text === '') {
-                showApiMessage('Veuillez saisir du texte à lire.', 'error');
-                return;
-            }
-            
-            if (!selectedVoice && allVoices.length > 0) {
-                selectedVoice = allVoices[0];
-                showApiMessage('Utilisation de la première voix.', 'warning');
+                showApiMessage('❌ Veuillez saisir du texte à lire.');
+                return false;
             }
             
             if (!selectedVoice) {
-                showApiMessage('Aucune voix disponible.', 'error');
-                return;
+                showApiMessage('❌ Aucune voix sélectionnée. Veuillez choisir une voix.');
+                return false;
             }
             
-            if (synth.speaking) synth.cancel();
+            if (currentUtterance) {
+                synth.cancel();
+            }
+            
+            downloadBtn.disabled = true;
+            clearApiMessage();
             
             try {
                 currentUtterance = new SpeechSynthesisUtterance(text);
+                
                 currentUtterance.voice = selectedVoice;
                 currentUtterance.rate = parseFloat(rateSlider.value);
                 currentUtterance.pitch = parseFloat(pitchSlider.value);
@@ -1033,102 +1002,196 @@
                     isPlaying = true;
                     isPaused = false;
                     updateButtons();
-                    updateStatus(`Lecture avec ${selectedVoice.name}...`, 'speaking');
+                    status.textContent = 'Lecture en cours...';
+                    status.className = 'status speaking';
                 };
                 
                 currentUtterance.onend = () => {
                     isPlaying = false;
                     isPaused = false;
                     updateButtons();
-                    updateStatus('Lecture terminée', 'ready');
+                    status.textContent = 'Lecture terminée';
+                    status.className = 'status ready';
                 };
                 
-                currentUtterance.onerror = () => {
+                currentUtterance.onerror = (event) => {
+                    console.error('Erreur de synthèse vocale:', event);
                     isPlaying = false;
                     isPaused = false;
                     updateButtons();
-                    updateStatus('Erreur', 'error');
-                    showApiMessage('Erreur de synthèse', 'error');
+                    
+                    // Messages d'erreur plus précis
+                    if (event.error === 'not-allowed') {
+                        status.textContent = 'Lecture bloquée par le navigateur';
+                        showApiMessage('❌ La lecture automatique est bloquée. Cliquez sur le bouton "Lire" après une interaction avec la page.');
+                    } else if (event.error === 'language-unavailable') {
+                        status.textContent = 'Langue non disponible';
+                        showApiMessage('❌ La langue sélectionnée n\'est pas disponible. Choisissez une autre voix.');
+                    } else {
+                        status.textContent = 'Erreur lors de la lecture';
+                        showApiMessage(`❌ Erreur de synthèse vocale: ${event.error || 'inconnue'}`);
+                    }
+                    
+                    status.className = 'status stopped';
                 };
                 
                 currentUtterance.onpause = () => {
                     isPaused = true;
                     updateButtons();
-                    updateStatus('Pause', 'paused');
+                    status.textContent = 'Lecture en pause';
+                    status.className = 'status paused';
                 };
                 
                 currentUtterance.onresume = () => {
                     isPaused = false;
                     updateButtons();
-                    updateStatus('Reprise', 'speaking');
+                    status.textContent = 'Reprise de la lecture';
+                    status.className = 'status speaking';
                 };
                 
                 synth.speak(currentUtterance);
+                return true;
                 
             } catch (error) {
-                showApiMessage('Erreur', 'error');
-                updateStatus('Erreur', 'error');
-                updateButtons();
+                console.error('Erreur lors de la création de l\'utterance:', error);
+                showApiMessage('❌ Erreur lors de l\'initialisation de la synthèse vocale');
+                return false;
             }
         }
 
-        // Gestionnaires d'événements
+        // Gérer la lecture du texte
         playBtn.addEventListener('click', () => {
-            if (isPlaying && !isPaused) return;
-            currentEngine === 'voicerss' ? speakWithVoiceRSS() : speakWithBrowser();
+            if (isPlaying && !isPaused) {
+                return;
+            }
+            
+            if (currentEngine === 'voicerss') {
+                speakWithVoiceRSS();
+            } else {
+                speakWithBrowser();
+            }
         });
 
+        // Gérer la pause
         pauseBtn.addEventListener('click', () => {
             if (currentEngine === 'voicerss') {
-                if (audioElement && isPlaying && !isPaused) audioElement.pause();
+                if (audioElement && isPlaying && !isPaused) {
+                    audioElement.pause();
+                    isPaused = true;
+                    updateButtons();
+                    status.textContent = 'Lecture en pause';
+                    status.className = 'status paused';
+                }
             } else {
-                if (isPlaying && !isPaused) synth.pause();
+                if (isPlaying && !isPaused) {
+                    synth.pause();
+                    isPaused = true;
+                    updateButtons();
+                    status.textContent = 'Lecture en pause';
+                    status.className = 'status paused';
+                }
             }
         });
 
+        // Gérer la reprise
         resumeBtn.addEventListener('click', () => {
             if (currentEngine === 'voicerss') {
-                if (audioElement && isPlaying && isPaused) audioElement.play();
+                if (audioElement && isPlaying && isPaused) {
+                    audioElement.play();
+                    isPaused = false;
+                    updateButtons();
+                    status.textContent = 'Reprise de la lecture';
+                    status.className = 'status speaking';
+                }
             } else {
-                if (isPlaying && isPaused) synth.resume();
+                if (isPlaying && isPaused) {
+                    synth.resume();
+                    isPaused = false;
+                    updateButtons();
+                    status.textContent = 'Reprise de la lecture';
+                    status.className = 'status speaking';
+                }
             }
         });
 
+        // Gérer l'arrêt
         stopBtn.addEventListener('click', () => {
             if (currentEngine === 'voicerss') {
                 if (audioElement) {
                     audioElement.pause();
                     audioElement.currentTime = 0;
                 }
+                isPlaying = false;
+                isPaused = false;
+                updateButtons();
+                status.textContent = 'Lecture arrêtée';
+                status.className = 'status stopped';
             } else {
                 synth.cancel();
+                isPlaying = false;
+                isPaused = false;
+                updateButtons();
+                status.textContent = 'Lecture arrêtée';
+                status.className = 'status stopped';
             }
-            isPlaying = false;
-            isPaused = false;
-            updateButtons();
-            updateStatus('Arrêté', 'stopped');
         });
 
+        // Gérer le téléchargement
         downloadBtn.addEventListener('click', function() {
             if (!audioBlob) {
-                showApiMessage('Aucun fichier à télécharger.', 'error');
+                showApiMessage('❌ Aucun fichier audio à télécharger. Veuillez d\'abord générer l\'audio avec VoiceRSS.');
                 return;
             }
             
-            const fileName = `audio_${Date.now()}.mp3`;
-            const downloadLink = document.createElement('a');
-            downloadLink.href = audioUrl;
-            downloadLink.download = fileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            setTimeout(() => document.body.removeChild(downloadLink), 100);
-            showApiMessage(`Téléchargement: ${fileName}`, 'success');
+            try {
+                // Créer un nom de fichier basé sur le contenu
+                const text = textInput.value.trim();
+                let fileName = 'audio_generé.mp3';
+                
+                if (text.length > 0) {
+                    // Prendre les premiers 20 caractères pour le nom de fichier
+                    const safeName = text.substring(0, 20)
+                        .replace(/[^a-zA-Z0-9\u00C0-\u017F\s]/g, '')
+                        .replace(/\s+/g, '_');
+                    fileName = `audio_${safeName}_${Date.now()}.mp3`;
+                } else {
+                    fileName = `audio_${Date.now()}.mp3`;
+                }
+                
+                // S'assurer que l'URL est valide
+                let downloadUrl = audioUrl;
+                if (!downloadUrl) {
+                    downloadUrl = URL.createObjectURL(audioBlob);
+                }
+                
+                // Créer un lien de téléchargement
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = fileName;
+                
+                // Ajouter au DOM, cliquer, et retirer
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                // Nettoyer après un court délai
+                setTimeout(() => {
+                    document.body.removeChild(downloadLink);
+                }, 100);
+                
+                showApiMessage(`✅ Téléchargement démarré: ${fileName}`, 'success');
+                
+            } catch (error) {
+                console.error('Erreur lors du téléchargement:', error);
+                showApiMessage('❌ Erreur lors du téléchargement du fichier');
+            }
         });
 
+        // Gérer la réinitialisation
         resetBtn.addEventListener('click', () => {
             if (currentEngine === 'voicerss') {
                 if (audioElement) {
                     audioElement.pause();
+                    audioElement.currentTime = 0;
                     audioElement.src = '';
                 }
                 if (audioUrl) {
@@ -1153,45 +1216,31 @@
             textInput.value = '';
             updateTextStats();
             
-            voiceSearch.value = '';
-            
-            if (allVoices.length > 0) {
-                const frenchVoice = allVoices.find(v => v.lang.startsWith('fr'));
-                selectedVoice = frenchVoice || allVoices[0];
-                filterVoices();
+            if (voices.length > 0 && currentEngine === 'browser') {
+                document.querySelectorAll('.voice-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                const firstVoiceOption = document.querySelector('.voice-option');
+                if (firstVoiceOption) {
+                    firstVoiceOption.classList.add('selected');
+                }
+                selectedVoice = voices[0];
             }
             
             downloadBtn.disabled = true;
+            
             updateButtons();
-            updateStatus('Réinitialisé', 'ready');
+            status.textContent = 'Prêt à convertir le texte en voix';
+            status.className = 'status ready';
             clearApiMessage();
-            showApiMessage('✅ Réinitialisé', 'success');
         });
 
-        loadExample.addEventListener('click', () => {
-            textInput.value = `La synthèse vocale du premier code avec les voix naturelles.
-
-Voici les voix que vous retrouvez :
-- Google Français
-- Microsoft Julie
-- Microsoft Hortense
-- Google UK English Female
-- Google UK English Male
-- Microsoft Susan
-- Microsoft Hazel
-- Google US English
-- Microsoft Zira
-- Microsoft David
-
-Toutes ces voix sont maintenant disponibles et mises en avant.`;
-            updateTextStats();
-            showApiMessage('📋 Exemple chargé', 'success');
-        });
-
+        // Mettre à jour l'état des boutons
         function updateButtons() {
             const isVoiceRSS = currentEngine === 'voicerss';
+            const hasValidKey = isValidApiKey(apiKeyInput.value);
             
-            playBtn.disabled = (isPlaying && !isPaused) || (isVoiceRSS && !apiKeyInput.value.trim());
+            playBtn.disabled = (isPlaying && !isPaused) || (isVoiceRSS && !hasValidKey);
             pauseBtn.disabled = !isPlaying || isPaused;
             resumeBtn.disabled = !isPlaying || !isPaused;
             stopBtn.disabled = !isPlaying;
@@ -1203,14 +1252,58 @@ Toutes ces voix sont maintenant disponibles et mises en avant.`;
             }
         }
 
-        // Initialisation
-        window.addEventListener('load', () => {
-            if (apiKeyInput.value.trim()) {
-                showApiMessage('✅ Clé API VoiceRSS détectée', 'success');
+        // Charger un exemple de texte
+        loadExample.addEventListener('click', () => {
+            textInput.value = `La synthèse vocale, ou text-to-speech (TTS), est une technologie qui convertit le texte en parole artificielle.
+
+Cette technologie est utilisée dans de nombreux domaines : assistance aux personnes malvoyantes, navigation GPS, assistants vocaux, et bien plus encore.
+
+Le respect de la ponctuation est essentiel pour une lecture naturelle. Par exemple, une virgule introduit une courte pause, un point une pause plus longue, et un point d'interrogation modifie l'intonation de la voix.
+
+Avec VoiceRSS, vous pouvez générer un fichier audio de haute qualité et le télécharger au format MP3 pour une utilisation hors ligne.
+
+Essayez avec votre propre texte maintenant !`;
+            updateTextStats();
+            clearApiMessage();
+        });
+
+        // Mettre à jour l'état des boutons quand la clé API change
+        apiKeyInput.addEventListener('input', function() {
+            const key = this.value.trim();
+            
+            if (key && isValidApiKey(key)) {
+                apiKeyWarning.classList.add('hidden');
+                showApiMessage('✅ Clé API valide détectée', 'success');
+            } else if (key) {
+                apiKeyWarning.classList.remove('hidden');
+                showApiMessage('⚠️ La clé API semble trop courte', 'warning');
+            } else {
+                apiKeyWarning.classList.remove('hidden');
             }
+            
             updateButtons();
         });
 
+        // Initialisation au chargement de la page
+        window.addEventListener('load', () => {
+            // Vérifier la clé API
+            if (apiKeyInput.value.trim()) {
+                if (isValidApiKey(apiKeyInput.value.trim())) {
+                    showApiMessage('✅ Clé API VoiceRSS détectée. Vous pouvez utiliser VoiceRSS.', 'success');
+                    apiKeyWarning.classList.add('hidden');
+                } else {
+                    showApiMessage('⚠️ La clé API préconfigurée n\'est plus valide. Obtenez une nouvelle clé sur voicerss.org', 'warning');
+                    apiKeyInput.value = ''; // Effacer la clé invalide
+                    apiKeyWarning.classList.remove('hidden');
+                }
+            } else {
+                showApiMessage('ℹ️ Pour utiliser VoiceRSS, obtenez une clé gratuite sur voicerss.org', 'warning');
+            }
+            
+            updateButtons();
+        });
+
+        // Initialiser l'état des boutons
         updateButtons();
     </script>
 </body>
