@@ -1059,30 +1059,32 @@ function speakWithBrowser() {
     }
 }
 
-                    
-                    status.className = 'status stopped';
-                
-                currentUtterance.onpause = () => {
-                    isPaused = true;
-                    updateButtons();
-                    status.textContent = 'Lecture en pause';
-                    status.className = 'status paused';
-                };
-                
-                currentUtterance.onresume = () => {
-                    isPaused = false;
-                    updateButtons();
-                    status.textContent = 'Reprise de la lecture';
-                    status.className = 'status speaking';
-                };
-                
-                synth.speak(currentUtterance);
-                return true;
-                
-            } catch (error) {
-                console.error('Erreur lors de la création de l\'utterance:', error);
-                showApiMessage('❌ Erreur lors de l\'initialisation de la synthèse vocale');
-                return false;
+             try {
+    status.className = 'status stopped';
+    
+    currentUtterance.onpause = () => {
+        isPaused = true;
+        updateButtons();
+        status.textContent = 'Lecture en pause';
+        status.className = 'status paused';
+    };
+    
+    currentUtterance.onresume = () => {
+        isPaused = false;
+        updateButtons();
+        status.textContent = 'Reprise de la lecture';
+        status.className = 'status speaking';
+    };
+    
+    synth.speak(currentUtterance);
+    return true;  // ✅ Correct : placé à l’intérieur de la fonction
+    
+} catch (error) {
+    console.error('Erreur lors de la création de l\'utterance:', error);
+    showApiMessage('❌ Erreur lors de l\'initialisation de la synthèse vocale');
+    return false; // ✅ Correct : placé à l’intérieur de la fonction
+}
+    
             }
         }
 
@@ -1335,5 +1337,6 @@ Essayez avec votre propre texte maintenant !`;
     </script>
 </body>
 </html>
+
 
 
