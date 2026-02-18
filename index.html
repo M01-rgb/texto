@@ -642,6 +642,7 @@ Avec VoiceRSS, vous pouvez également télécharger le fichier audio en MP3 pour
         let audioUrl = null;
         let currentEngine = 'browser'; // 'browser' ou 'voicerss'
         let audioElement = null;
+        let voicesLoaded = false;
 
         // Configuration des moteurs
         engineBrowser.addEventListener('click', () => {
@@ -724,6 +725,7 @@ Avec VoiceRSS, vous pouvez également télécharger le fichier audio en MP3 pour
         // Charger les voix disponibles pour le navigateur
         function loadVoices() {
             voices = synth.getVoices();
+            voicesLoaded = true;
             voicesLoading.style.display = 'none';
             voicesContainer.innerHTML = '';
             
@@ -968,7 +970,7 @@ Avec VoiceRSS, vous pouvez également télécharger le fichier audio en MP3 pour
             }
         }
 
-        // Utiliser la synthèse vocale du navigateur - VERSION CORRIGÉE
+        // Utiliser la synthèse vocale du navigateur - VERSION AMÉLIORÉE
         function speakWithBrowser() {
             const text = textInput.value.trim();
             
@@ -983,6 +985,7 @@ Avec VoiceRSS, vous pouvez également télécharger le fichier audio en MP3 pour
                 return false;
             }
             
+            // Annuler toute synthèse en cours
             if (currentUtterance) {
                 synth.cancel();
             }
@@ -992,20 +995,19 @@ Avec VoiceRSS, vous pouvez également télécharger le fichier audio en MP3 pour
             
             try {
                 currentUtterance = new SpeechSynthesisUtterance(text);
-currentUtterance.voice = selectedVoice;
-currentUtterance.rate = parseFloat(rateSlider.value);
-currentUtterance.pitch = parseFloat(pitchSlider.value);
-currentUtterance.volume = parseFloat(volumeSlider.value);
-
-currentUtterance.onerror = (event) => {
-    console.error('Erreur de synthèse vocale:', event);
-    isPlaying = false;
-    isPaused = false;
-    updateButtons();
-    status.textContent = 'Erreur lors de la lecture';
-    status.className = 'status stopped';
-    showApiMessage(`❌ Erreur de synthèse vocale: ${event.error || 'inconnue'}`);
-};
+                
+                currentUtterance.voice = selectedVoice;
+                currentUtterance.rate = parseFloat(rateSlider.value);
+                currentUtterance.pitch = parseFloat(pitchSlider.value);
+                currentUtterance.volume = parseFloat(volumeSlider.value);
+                
+                currentUtterance.onstart = () => {
+                    isPlaying = true;
+                    isPaused = false;
+                    updateButtons();
+                    status.textContent = 'Lecture en cours...';
+                    status.className = 'status speaking';
+                };
                 
                 currentUtterance.onend = () => {
                     isPlaying = false;
@@ -1021,19 +1023,37 @@ currentUtterance.onerror = (event) => {
                     isPaused = false;
                     updateButtons();
                     
-                    // Messages d'erreur plus précis
-                    if (event.error === 'not-allowed') {
-                        status.textContent = 'Lecture bloquée par le navigateur';
-                        showApiMessage('❌ La lecture automatique est bloquée. Cliquez sur le bouton "Lire" après une interaction avec la page.');
-                    } else if (event.error === 'language-unavailable') {
-                        status.textContent = 'Langue non disponible';
-                        showApiMessage('❌ La langue sélectionnée n\'est pas disponible. Choisissez une autre voix.');
-                    } else {
-                        status.textContent = 'Erreur lors de la lecture';
-                        showApiMessage(`❌ Erreur de synthèse vocale: ${event.error || 'inconnue'}`);
+                    // Analyser le type d'erreur pour un message plus précis
+                    let errorMessage = '';
+                    switch(event.error) {
+                        case 'not-allowed':
+                            errorMessage = 'La lecture automatique est bloquée par le navigateur. Cliquez sur le bouton après une interaction avec la page.';
+                            break;
+                        case 'language-unavailable':
+                            errorMessage = 'La langue sélectionnée n\'est pas disponible. Choisissez une autre voix.';
+                            break;
+                        case 'voice-unavailable':
+                            errorMessage = 'La voix sélectionnée n\'est pas disponible. Choisissez une autre voix.';
+                            break;
+                        case 'synthesis-failed':
+                            errorMessage = 'La synthèse vocale a échoué. Veuillez réessayer.';
+                            break;
+                        case 'canceled':
+                            errorMessage = 'La synthèse a été annulée.';
+                            break;
+                        case 'interrupted':
+                            errorMessage = 'La synthèse a été interrompue.';
+                            break;
+                        case 'network':
+                            errorMessage = 'Erreur réseau. Vérifiez votre connexion.';
+                            break;
+                        default:
+                            errorMessage = `Erreur de synthèse vocale: ${event.error || 'inconnue'}`;
                     }
                     
+                    status.textContent = 'Erreur lors de la lecture';
                     status.className = 'status stopped';
+                    showApiMessage(`❌ ${errorMessage}`);
                 };
                 
                 currentUtterance.onpause = () => {
@@ -1050,7 +1070,20 @@ currentUtterance.onerror = (event) => {
                     status.className = 'status speaking';
                 };
                 
-                synth.speak(currentUtterance);
+                // Petit délai pour s'assurer que tout est prêt
+                setTimeout(() => {
+                    try {
+                        synth.speak(currentUtterance);
+                    } catch (speakError) {
+                        console.error('Erreur lors de l\'appel à speak():', speakError);
+                        showApiMessage('❌ Erreur lors du démarrage de la synthèse vocale');
+                        status.textContent = 'Erreur de démarrage';
+                        status.className = 'status stopped';
+                        isPlaying = false;
+                        updateButtons();
+                    }
+                }, 50);
+                
                 return true;
                 
             } catch (error) {
@@ -1087,11 +1120,16 @@ currentUtterance.onerror = (event) => {
                 }
             } else {
                 if (isPlaying && !isPaused) {
-                    synth.pause();
-                    isPaused = true;
-                    updateButtons();
-                    status.textContent = 'Lecture en pause';
-                    status.className = 'status paused';
+                    try {
+                        synth.pause();
+                        isPaused = true;
+                        updateButtons();
+                        status.textContent = 'Lecture en pause';
+                        status.className = 'status paused';
+                    } catch (pauseError) {
+                        console.error('Erreur lors de la pause:', pauseError);
+                        showApiMessage('❌ Impossible de mettre en pause');
+                    }
                 }
             }
         });
@@ -1108,11 +1146,16 @@ currentUtterance.onerror = (event) => {
                 }
             } else {
                 if (isPlaying && isPaused) {
-                    synth.resume();
-                    isPaused = false;
-                    updateButtons();
-                    status.textContent = 'Reprise de la lecture';
-                    status.className = 'status speaking';
+                    try {
+                        synth.resume();
+                        isPaused = false;
+                        updateButtons();
+                        status.textContent = 'Reprise de la lecture';
+                        status.className = 'status speaking';
+                    } catch (resumeError) {
+                        console.error('Erreur lors de la reprise:', resumeError);
+                        showApiMessage('❌ Impossible de reprendre la lecture');
+                    }
                 }
             }
         });
@@ -1130,7 +1173,11 @@ currentUtterance.onerror = (event) => {
                 status.textContent = 'Lecture arrêtée';
                 status.className = 'status stopped';
             } else {
-                synth.cancel();
+                try {
+                    synth.cancel();
+                } catch (cancelError) {
+                    console.error('Erreur lors de l\'annulation:', cancelError);
+                }
                 isPlaying = false;
                 isPaused = false;
                 updateButtons();
@@ -1203,7 +1250,11 @@ currentUtterance.onerror = (event) => {
                 }
                 audioBlob = null;
             } else {
-                synth.cancel();
+                try {
+                    synth.cancel();
+                } catch (cancelError) {
+                    console.error('Erreur lors de l\'annulation:', cancelError);
+                }
             }
             
             isPlaying = false;
@@ -1311,4 +1362,3 @@ Essayez avec votre propre texte maintenant !`;
     </script>
 </body>
 </html>
-
