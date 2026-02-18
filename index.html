@@ -992,19 +992,20 @@ Avec VoiceRSS, vous pouvez également télécharger le fichier audio en MP3 pour
             
             try {
                 currentUtterance = new SpeechSynthesisUtterance(text);
-                
-                currentUtterance.voice = selectedVoice;
-                currentUtterance.rate = parseFloat(rateSlider.value);
-                currentUtterance.pitch = parseFloat(pitchSlider.value);
-                currentUtterance.volume = parseFloat(volumeSlider.value);
-                
-                currentUtterance.onstart = () => {
-                    isPlaying = true;
-                    isPaused = false;
-                    updateButtons();
-                    status.textContent = 'Lecture en cours...';
-                    status.className = 'status speaking';
-                };
+currentUtterance.voice = selectedVoice;
+currentUtterance.rate = parseFloat(rateSlider.value);
+currentUtterance.pitch = parseFloat(pitchSlider.value);
+currentUtterance.volume = parseFloat(volumeSlider.value);
+
+currentUtterance.onerror = (event) => {
+    console.error('Erreur de synthèse vocale:', event);
+    isPlaying = false;
+    isPaused = false;
+    updateButtons();
+    status.textContent = 'Erreur lors de la lecture';
+    status.className = 'status stopped';
+    showApiMessage(`❌ Erreur de synthèse vocale: ${event.error || 'inconnue'}`);
+};
                 
                 currentUtterance.onend = () => {
                     isPlaying = false;
@@ -1310,3 +1311,4 @@ Essayez avec votre propre texte maintenant !`;
     </script>
 </body>
 </html>
+
